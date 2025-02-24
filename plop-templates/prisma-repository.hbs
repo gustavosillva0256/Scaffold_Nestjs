@@ -1,0 +1,33 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma, {{pascalCase entity}} } from '@prisma/client';
+
+@Injectable()
+export class {{pascalCase entity}}PrismaRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(data: Prisma.{{pascalCase entity}}CreateInput): Promise<{{pascalCase entity}}> {
+    return this.prisma.{{camelCase entity}}.create({ data });
+  }
+
+  async findAll(): Promise<{{pascalCase entity}}[]> {
+    return this.prisma.{{camelCase entity}}.findMany();
+  }
+
+  async findById(id: string): Promise<{{pascalCase entity}} | null> {
+    return this.prisma.{{camelCase entity}}.findUnique({ where: { id } });
+  }
+
+  async update(id: string, data: Prisma.{{pascalCase entity}}UpdateInput): Promise<{{pascalCase entity}}> {
+    return this.prisma.{{camelCase entity}}.update({ where: { id }, data });
+  }
+
+  async delete(id: string): Promise<{{pascalCase entity}}> {
+    return this.prisma.{{camelCase entity}}.delete({ where: { id } });
+  }
+
+  async exists(id: string): Promise<boolean> {
+    const count = await this.prisma.{{camelCase entity}}.count({ where: { id } });
+    return count > 0;
+  }
+}

@@ -1,0 +1,25 @@
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Get{{properCase entity}}Service } from '../services/get-{{dashCase entity}}.service';
+import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
+
+@ApiTags('{{properCase entity}}')
+@Controller('{{dashCase entity}}')
+export class Get{{properCase entity}}Controller {
+  constructor(private readonly getService: Get{{properCase entity}}Service) {}
+
+  @Get()
+  @ApiOperation({ 
+    summary: 'Listar todos os {{properCase entity}}s', 
+    description: 'Retorna todos os {{properCase entity}}s cadastrados no sistema.' 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista retornada com sucesso.',
+    type: [{{properCase entity}}Dto] 
+  })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
+  async execute() {
+    return this.getService.execute();
+  }
+}

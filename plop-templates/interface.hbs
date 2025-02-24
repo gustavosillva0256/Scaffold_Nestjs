@@ -1,0 +1,17 @@
+import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
+import { Create{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+import { Update{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/update-{{dashCase entity}}.dto';
+
+export interface {{properCase entity}}Repository {
+  create(data: Create{{properCase entity}}Dto): Promise<{{properCase entity}}Dto>;
+  findAll(): Promise<{{properCase entity}}Dto[]>;
+  findById(id: string): Promise<{{properCase entity}}Dto | null>;
+  update(id: string, data: Update{{properCase entity}}Dto): Promise<{{properCase entity}}Dto>;
+  delete(id: string): Promise<{{properCase entity}}Dto>;
+  
+  {{#each fields}}
+  {{#if (isUnique this)}}
+  findBy{{properCase name}}({{name}}: {{type}}): Promise<{{properCase entity}}Dto | null>;
+  {{/if}}
+  {{/each}}
+}

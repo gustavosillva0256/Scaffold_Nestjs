@@ -1,0 +1,14 @@
+import { Inject,Injectable } from '@nestjs/common';
+import { {{properCase entity}}Repository } from '../interfaces/{{dashCase entity}}.interface';
+
+@Injectable()
+export class Get{{properCase entity}}Service {
+  constructor(
+    @Inject('{{properCase entity}}Repository')
+    private readonly repository: {{properCase entity}}Repository,
+  ) {}
+
+  async execute() { 
+    return this.repository.findAll(); 
+  }
+}

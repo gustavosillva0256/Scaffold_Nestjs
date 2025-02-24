@@ -1,0 +1,26 @@
+import { Controller, Post, Body } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Create{{properCase entity}}Service } from '../services/create-{{dashCase entity}}.service';
+import { Create{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+
+@ApiTags('{{properCase entity}}')
+@Controller('{{dashCase entity}}')
+export class Create{{properCase entity}}Controller {
+  constructor(
+    private readonly createService: Create{{properCase entity}}Service,
+  ) {}
+
+  @Post()
+  @ApiOperation({ 
+    summary: 'Criar um novo {{properCase entity}}',
+    description: 'Adiciona um novo {{properCase entity}} ao sistema.' 
+  })
+  @ApiBody({ type: Create{{properCase entity}}Dto })
+  @ApiResponse({ status: 201, description: 'Registro criado com sucesso.' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos ou incompletos.' })
+  @ApiResponse({ status: 409, description: 'Conflito: dado único já cadastrado.' })
+  @ApiResponse({ status: 500, description: 'Erro interno no servidor.' })
+  async create(@Body() dto: Create{{properCase entity}}Dto) {
+    return this.createService.execute(dto);
+  }
+}

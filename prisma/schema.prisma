@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+generator nestjsDto {
+  provider = "prisma-generator-nestjs-dto"
+  output   = "../src/dtos"
+  outputToNestJsResourceStructure = true
+  noDependencies = false
+  exportRelationModifierClasses = false
+  separateRelationFields = false
+  addSwaggerDecorators = true
+  classValidation = true
+}
+
+//EXAMPLO DE COMO USAR O CLASS-VALIDATION PARA DOCUMENTAR A API
+model User {
+  id    Int     @id @default(autoincrement())
+  /// @ApiProperty()
+  /// @IsString()
+  name  String?
+   /// @IsString()
+  /// @IsOptional()
+  email String  @unique
+   /// @ApiProperty()
+  /// @DtoReadOnly
+  posts Post[]
+  /// @ApiProperty()
+  /// @IsOptional()
+
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+   /// @ApiProperty()
+  /// @IsString()
+  title     String  
+  /// @IsString()
+  content   String?
+    /// @DtoReadOnly
+   /// @IsOptional()
+  authorId  Int
+    /// @DtoReadOnly
+
+  published Boolean @default(false)
+  author    User    @relation(fields: [authorId], references: [id])
+}

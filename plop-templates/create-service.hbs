@@ -1,0 +1,48 @@
+import { Injectable, Inject, ConflictException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Create{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
+import { {{properCase entity}}Repository } from '../interfaces/{{dashCase entity}}.interface';
+
+@Injectable()
+export class Create{{properCase entity}}Service {
+  constructor(
+    @Inject('{{properCase entity}}Repository') 
+    private readonly repository: {{properCase entity}}Repository,
+  ) {}
+
+  async execute(data: Create{{properCase entity}}Dto): Promise<{{properCase entity}}Dto> {
+    try {
+      // 🔹 Verifica se os campos obrigatórios estão preenchidos
+      {{#each fields}}
+      {{#if (isRequired this)}}
+      if (!data.{{name}}?.trim()) {
+        throw new BadRequestException("O campo '{{name}}' é obrigatório.");
+      }
+      {{/if}}
+      {{/each}}
+
+      // 🔹 Verifica se registros únicos já existem no banco
+      {{#each fields}}
+      {{#if (isUnique this)}}
+      const existing = await this.repository.findBy{{properCase name}}(data.{{name}});
+      if (existing) {
+        throw new ConflictException("{{properCase name}} já cadastrado.");
+      }
+      {{/if}}
+      {{/each}}
+
+      // ✅ Criar o registro
+      return await this.repository.create(data);
+    } catch (error) {
+      console.error("Erro ao criar {{properCase entity}}:", error.message);
+      
+      // 🔹 Relança erros conhecidos diretamente
+      if (error instanceof BadRequestException || error instanceof ConflictException) {
+        throw error;
+      }
+
+      // 🔹 Erro inesperado, relançado como erro interno do servidor
+      throw new InternalServerErrorException("Erro ao criar {{properCase entity}}.");
+    }
+  }
+}

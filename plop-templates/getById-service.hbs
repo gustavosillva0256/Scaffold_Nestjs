@@ -1,0 +1,15 @@
+import {Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { {{properCase entity}}Repository } from '../interfaces/{{dashCase entity}}.interface';
+
+@Injectable()
+export class GetById{{properCase entity}}Service {
+  constructor(
+    @Inject('{{properCase entity}}Repository')
+    private readonly repository: {{properCase entity}}Repository) {}
+
+  async execute(id: string) {
+    const entity = await this.repository.findById(id);
+    if (!entity) throw new NotFoundException('{{properCase entity}} com ID ' + id + ' não encontrado.');
+    return entity;
+  }
+}
