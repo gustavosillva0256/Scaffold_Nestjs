@@ -27,7 +27,7 @@ ESLint + Prettier → Padronização e linting de código
  ┗ app.module.ts            # Módulo raiz da aplicação
 
 🔧 Configuração do Ambiente
-git clone https://github.com/seu-repo/seu-projeto.git
+git clone https://github.com/gustavosillva0256/Scaffold_Nestjs.git
 cd seu-projeto
 npm install
 
@@ -44,7 +44,7 @@ Abra no navegador: http://localhost:3000/api
 🛠 Geração Automática de Módulos com Plop
 O Plop.js automatiza a criação de módulos CRUD. Para criar um novo módulo, execute:
 
-npx plop scaffold
+npx plop scaffold nome da tabela, ex: npx plop scaffold User
 
 Siga as instruções e informe o nome da entidade (exemplo: Usuario). Isso criará automaticamente:
 
