@@ -7,7 +7,7 @@ export class ClientPrismaRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Prisma.ClientCreateInput): Promise<Client> {
-    return this.prisma.client.create({ data });
+    return this.prisma.client.create({ data, include:{addresses:true} });
   }
 
   async findAll(): Promise<Client[]> {

@@ -1,12 +1,54 @@
+
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsNotEmpty} from 'class-validator'
+import {IsInt,IsOptional} from 'class-validator'
+
+
+
 
 export class ConnectAddressDto {
   @ApiProperty({
   type: 'integer',
   format: 'int32',
+  required: false,
+  nullable: true,
 })
-@IsNotEmpty()
+@IsOptional()
 @IsInt()
-id: number ;
+id?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+clientId?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+supplierId?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+sellerId?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+serviceOrderId?: number ;
 }

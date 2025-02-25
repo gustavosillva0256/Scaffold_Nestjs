@@ -1,6 +1,10 @@
 
+import {AddressType} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
 import {IsOptional,IsString} from 'class-validator'
+
+
+
 
 export class UpdateAddressDto {
   @ApiProperty({
@@ -53,4 +57,11 @@ city?: string ;
 @IsOptional()
 @IsString()
 state?: string ;
+@ApiProperty({
+  enum: AddressType,
+  enumName: 'AddressType',
+  required: false,
+})
+@IsOptional()
+type?: AddressType ;
 }

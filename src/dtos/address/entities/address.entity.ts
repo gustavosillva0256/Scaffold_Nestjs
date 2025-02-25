@@ -1,6 +1,10 @@
 
+import {AddressType} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
 import {Client} from '../../client/entities/client.entity'
+import {Supplier} from '../../supplier/entities/supplier.entity'
+import {Seller} from '../../seller/entities/seller.entity'
+import {ServiceOrder} from '../../serviceOrder/entities/serviceOrder.entity'
 
 
 export class Address {
@@ -39,10 +43,34 @@ city: string ;
 })
 state: string ;
 @ApiProperty({
+  enum: AddressType,
+  enumName: 'AddressType',
+})
+type: AddressType ;
+@ApiProperty({
   type: 'integer',
   format: 'int32',
+  nullable: true,
 })
-clientId: number ;
+clientId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+supplierId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+sellerId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+serviceOrderId: number  | null;
 @ApiProperty({
   type: 'string',
   format: 'date-time',
@@ -56,6 +84,25 @@ updatedAt: Date ;
 @ApiProperty({
   type: () => Client,
   required: false,
+  nullable: true,
 })
-client?: Client ;
+client?: Client  | null;
+@ApiProperty({
+  type: () => Supplier,
+  required: false,
+  nullable: true,
+})
+supplier?: Supplier  | null;
+@ApiProperty({
+  type: () => Seller,
+  required: false,
+  nullable: true,
+})
+seller?: Seller  | null;
+@ApiProperty({
+  type: () => ServiceOrder,
+  required: false,
+  nullable: true,
+})
+serviceOrder?: ServiceOrder  | null;
 }

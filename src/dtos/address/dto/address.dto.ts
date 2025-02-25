@@ -1,5 +1,7 @@
 
+import {AddressType} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
+
 
 export class AddressDto {
   @ApiProperty({
@@ -36,6 +38,11 @@ city: string ;
   type: 'string',
 })
 state: string ;
+@ApiProperty({
+  enum: AddressType,
+  enumName: 'AddressType',
+})
+type: AddressType ;
 @ApiProperty({
   type: 'string',
   format: 'date-time',
