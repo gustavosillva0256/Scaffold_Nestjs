@@ -10,14 +10,14 @@ Este projeto é um scaffold para geração rápida e padronizada de módulos no 
 - **@nestjsx/crud** para endpoints RESTful completos e customizáveis
 
 ## Pré-requisitos
-- Node.js >= 16
+- Node.js >= 18
 - npm ou yarn
 - Banco de dados configurado no Prisma
 
 ## Instalação
 ```bash
 # Clone o repositório
-git clone <url-do-repo>
+git clone https://github.com/gustavosillva0256/Scaffold_Nestjs.git
 cd Scaffold_Nestjs
 
 # Instale as dependências
