@@ -1,0 +1,85 @@
+import { Injectable } from '@nestjs/common';
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
+import type { {{pascalCase entity}} } from '@prisma/client';
+import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
+import { Create{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+import { Update{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/update-{{dashCase entity}}.dto';
+
+@Injectable()
+export class {{properCase entity}}Mapper {
+  constructor(@InjectMapper() private readonly mapper: Mapper) {}
+  // Certifique-se de importar AutomapperModule.forRoot() no módulo
+
+  /**
+   * Converte uma entidade Prisma para DTO
+   * Adapte este método para mapear relações caso existam (ex: entity.relacao)
+   */
+  toDto(entity: {{pascalCase entity}}): {{properCase entity}}Dto {
+    return this.mapper.map(entity, {{properCase entity}}Dto, '{{pascalCase entity}}');
+  }
+
+  /**
+   * Converte um DTO de criação para o formato esperado pelo Prisma
+   */
+  toCreateInput(dto: Create{{properCase entity}}Dto): import('@prisma/client').Prisma.{{pascalCase entity}}CreateInput {
+    return {
+      {{#each createFields}}
+      // {{type}}
+      {{name}}: dto.{{name}},
+      {{/each}}
+    };
+  }
+
+  /**
+   * Converte um DTO de atualização para o formato esperado pelo Prisma
+   */
+  toUpdateInput(dto: Update{{properCase entity}}Dto): import('@prisma/client').Prisma.{{pascalCase entity}}UpdateInput {
+    return {
+      {{#each updateFields}}
+      // {{type}}
+      {{name}}: dto.{{name}},
+      {{/each}}
+    };
+  }
+
+  /**
+   * Converte uma lista de entidades Prisma para uma lista de DTOs
+   */
+  toDtoList(entities: {{pascalCase entity}}[]): {{properCase entity}}Dto[] {
+    return entities.map(entity => this.toDto(entity));
+  }
+}
+
+// Profile de mapeamento separado
+import { createMap, forMember, mapFrom } from '@automapper/core';
+import { Injectable as InjectableProfile } from '@nestjs/common';
+
+@InjectableProfile()
+export class {{properCase entity}}Profile {
+  constructor(mapper: Mapper) {}
+
+  get profile() {
+    return (mapper: Mapper) => {
+      createMap(mapper, '{{pascalCase entity}}', {{properCase entity}}Dto);
+      // Exemplo de mapeamento manual para relacionamentos:
+      // Para 1:N:
+      // forMember(
+      //   (dest) => dest.comments,
+      //   mapFrom((src) => src.comments?.map(item => mapper.map(item, CommentDto, Object)))
+      // ),
+      // Para 1:1:
+      // forMember(
+      //   (dest) => dest.author,
+      //   mapFrom((src) => src.author && mapper.map(src.author, UserDto, Object))
+      // ),
+    };
+  }
+}
+// Mapper e Profile separados, imports absolutos para DTOs e exemplos comentados. 
+
+/**
+ * Observações:
+ * - Os campos são gerados automaticamente a partir dos DTOs.
+ * - Adapte validações e transformações conforme necessário.
+ */ 

@@ -1,33 +1,31 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { GetById{{properCase entity}}Service } from '../services/getById-{{dashCase entity}}.service';
+// Controller para buscar por ID: GetByIdUserController
+// Importa o service: GetByIdUserService de '../services/get-by-id-user.service'
+// Arquivo do service: get-by-id-user.service.ts
+//
+import { Controller } from '@nestjs/common';
+import { Crud } from '@nestjsx/crud';
+import { ApiTags, ApiResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
 import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
+import { GetById{{properCase entity}}Service } from '../services/get-by-id-{{dashCase entity}}.service';
 
+@Crud({
+  model: { type: {{properCase entity}}Dto },
+  query: {
+    alwaysPaginate: true,
+    limit: 20,
+    maxLimit: 100,
+    //exclude: ['fields', 'select', 'filter', 'or', 'sort', 'join', 'cache'],
+  },
+  routes: {
+    only: ['getOneBase'],
+  },
+})
 @ApiTags('{{properCase entity}}')
+@ApiResponse({ status: 200, description: 'Consulta realizada com sucesso.', type: {{properCase entity}}Dto })
+@ApiBadRequestResponse({ description: 'Dados inválidos ou incompletos.' })
+@ApiNotFoundResponse({ description: 'Registro não encontrado.' })
+@ApiInternalServerErrorResponse({ description: 'Erro interno no servidor.' })
 @Controller('{{dashCase entity}}')
 export class GetById{{properCase entity}}Controller {
-  constructor(private readonly getByIdService: GetById{{properCase entity}}Service) {}
-
-  @Get(':id')
-  @ApiOperation({ 
-    summary: 'Buscar {{properCase entity}} por ID', 
-    description: 'Localiza um registro pelo identificador único (UUID).' 
-  })
-  @ApiParam({ 
-    name: 'id', 
-    description: 'UUID válido',
-    example: '550e8400-e29b-41d4-a716-446655440000' 
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Registro encontrado com sucesso.',
-    type: {{properCase entity}}Dto 
-  })
-  @ApiResponse({ status: 404, description: 'Registro não encontrado.' })
-  @ApiResponse({ status: 500, description: 'Erro interno do servidor.' })
-  async findOne(@Param('id') id: string) {
-    const entity = await this.getByIdService.execute(id);
-    if (!entity) throw new NotFoundException('{{properCase entity}} não encontrado.');
-    return entity;
-  }
-}
+  constructor(public service: GetById{{properCase entity}}Service) {}
+} 

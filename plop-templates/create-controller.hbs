@@ -1,26 +1,22 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { Create{{properCase entity}}Service } from '../services/create-{{dashCase entity}}.service';
+import { Controller } from '@nestjs/common';
+import { Crud } from '@nestjsx/crud';
+import { ApiTags, ApiResponse, ApiBadRequestResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
+import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
 import { Create{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+import { Create{{properCase entity}}Service } from '../services/create-{{dashCase entity}}.service';
 
+@Crud({
+  model: { type: {{properCase entity}}Dto },
+  dto: { create: Create{{properCase entity}}Dto },
+  routes: {
+    only: ['createOneBase'],
+  },
+})
 @ApiTags('{{properCase entity}}')
+@ApiResponse({ status: 201, description: 'Registro criado com sucesso.', type: {{properCase entity}}Dto })
+@ApiBadRequestResponse({ description: 'Dados inválidos ou incompletos.' })
+@ApiInternalServerErrorResponse({ description: 'Erro interno no servidor.' })
 @Controller('{{dashCase entity}}')
 export class Create{{properCase entity}}Controller {
-  constructor(
-    private readonly createService: Create{{properCase entity}}Service,
-  ) {}
-
-  @Post()
-  @ApiOperation({ 
-    summary: 'Criar um novo {{properCase entity}}',
-    description: 'Adiciona um novo {{properCase entity}} ao sistema.' 
-  })
-  @ApiBody({ type: Create{{properCase entity}}Dto })
-  @ApiResponse({ status: 201, description: 'Registro criado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos ou incompletos.' })
-  @ApiResponse({ status: 409, description: 'Conflito: dado único já cadastrado.' })
-  @ApiResponse({ status: 500, description: 'Erro interno no servidor.' })
-  async create(@Body() dto: Create{{properCase entity}}Dto) {
-    return this.createService.execute(dto);
-  }
-}
+  constructor(public service: Create{{properCase entity}}Service) {}
+} 

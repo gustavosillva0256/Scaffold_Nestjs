@@ -1,5 +1,6 @@
-import { Inject,Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { {{properCase entity}}Repository } from '../interfaces/{{dashCase entity}}.interface';
+import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
 
 @Injectable()
 export class Get{{properCase entity}}Service {
@@ -8,7 +9,7 @@ export class Get{{properCase entity}}Service {
     private readonly repository: {{properCase entity}}Repository,
   ) {}
 
-  async execute() { 
-    return this.repository.findAll(); 
+  async execute(): Promise<{{properCase entity}}Dto[]> {
+    return this.repository.findAll();
   }
-}
+}   

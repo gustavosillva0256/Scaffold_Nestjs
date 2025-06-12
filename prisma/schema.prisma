@@ -18,125 +18,33 @@ generator nestjsDto {
   classValidation = true
 }
 
-// ============== ENUMS ==============
-enum AddressType {
-  CLIENT
-  SUPPLIER
-  SELLER
-  SERVICE_ORDER
+// ============== MODELS DE EXEMPLO (Blog) ==============
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum OrderStatus {
-  EM_ANALISE    // Status ajustado para seu caso
-  A_RECEBER
-  FINALIZADA
-  CANCELADA
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  comments  Comment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// ============== MODELS ==============
-model Client {
-  id          Int         @id @default(autoincrement())
-  name        String  
-  email       String      @unique
-  phone       String   
-  addresses   Address[]   // Endereços vinculados
-  orders      ServiceOrder[] // Ordens de serviço do cliente
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  @@map("client")
-}
-
-model Address {  
-  id          Int           @id @default(autoincrement())  
-  zipCode     String        @map("zip_code")  
-  street      String                         
-  number      String                         
-  complement  String?                        
-  neighborhood String                        
-  city        String                         
-  state       String                         
-  type        AddressType   // Define qual entidade está vinculada
-  // Apenas UM destes campos será preenchido (dependendo do type):
-  clientId      Int?        @unique // Relação 1:1 com Client
-  supplierId    Int?        @unique // Relação 1:1 com Supplier
-  sellerId      Int?        @unique // Relação 1:1 com Seller
-  serviceOrderId Int?       @unique // Relação 1:1 com ServiceOrder
-  createdAt   DateTime      @default(now()) 
-  updatedAt   DateTime      @updatedAt
-
-  // Relações (opcionais, mas vinculadas pelo type)
-  client      Client?       @relation(fields: [clientId], references: [id])
-  supplier    Supplier?     @relation(fields: [supplierId], references: [id])
-  seller      Seller?       @relation(fields: [sellerId], references: [id])
-  serviceOrder ServiceOrder? @relation(fields: [serviceOrderId], references: [id])
-
-  @@map("address")  
-}
-
-model Supplier {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
-  phone       String
-  addresses   Address[] 
-  products    Product[] // Produtos fornecidos por este fornecedor
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("supplier")
-}
-
-model ServiceOrder {
-  id          Int                     @id @default(autoincrement())
-  description String                  
-  status      OrderStatus             @default(EM_ANALISE)
-  totalValue  Decimal                 @db.Decimal(10, 2)
-  deadline    DateTime                
-  client      Client                  @relation(fields: [clientId], references: [id])
-  clientId    Int
-  address     Address?                // Endereço relacionado (ex: local do serviço)
-  products    ServiceOrderProduct[]   // Produtos utilizados no serviço
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
-
-  @@index([status, deadline])
-  @@map("service_order")
-}
-
-model ServiceOrderProduct {
-  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id])
-  serviceOrderId Int 
-  product        Product      @relation(fields: [productId], references: [id])
-  productId      Int
-  quantity       Int          @default(1) // Quantidade do produto usado
-
-  @@id([serviceOrderId, productId])
-  @@map("service_order_product")
-}
-
-model Product {
-  id          Int       @id @default(autoincrement())
-  name        String    
-  description String?   
-  unitPrice   Decimal   @db.Decimal(10, 2) // Preço unitário de compra
-  supplier    Supplier  @relation(fields: [supplierId], references: [id])
-  supplierId  Int
-  orders      ServiceOrderProduct[] // Ordens que usaram este produto
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@map("product")
-}
-
-model Seller {
-  id            Int      @id @default(autoincrement())
-  name          String
-  email         String   @unique
-  address       Address? // Endereço opcional do vendedor
-  commissionRate Decimal  @db.Decimal(5, 2) // Caso precise pagar comissão
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@map("seller")
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

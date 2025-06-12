@@ -1,23 +1,35 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { {{properCase entity}}PrismaRepository } from './prisma-repositorys/{{dashCase entity}}.prisma-repository';
+import { AutomapperModule } from '@automapper/nestjs';
+import { classes } from '@automapper/classes';
+
+// Serviços
+import { Create{{properCase entity}}Service } from './services/create-{{dashCase entity}}.service';
+import { Get{{properCase entity}}Service } from './services/get-{{dashCase entity}}.service';
+import { GetById{{properCase entity}}Service } from './services/get-by-id-{{dashCase entity}}.service';
+import { Update{{properCase entity}}Service } from './services/update-{{dashCase entity}}.service';
+import { Delete{{properCase entity}}Service } from './services/delete-{{dashCase entity}}.service';
 
 // Controllers
 import { Create{{properCase entity}}Controller } from './controllers/create-{{dashCase entity}}.controller';
 import { Get{{properCase entity}}Controller } from './controllers/get-{{dashCase entity}}.controller';
-import { GetById{{properCase entity}}Controller } from './controllers/getById-{{dashCase entity}}.controller';
+import { GetById{{properCase entity}}Controller } from './controllers/get-by-id-{{dashCase entity}}.controller';
 import { Update{{properCase entity}}Controller } from './controllers/update-{{dashCase entity}}.controller';
 import { Delete{{properCase entity}}Controller } from './controllers/delete-{{dashCase entity}}.controller';
 
-// Services
-import { Create{{properCase entity}}Service } from './services/create-{{dashCase entity}}.service';
-import { Get{{properCase entity}}Service } from './services/get-{{dashCase entity}}.service';
-import { GetById{{properCase entity}}Service } from './services/getById-{{dashCase entity}}.service';
-import { Update{{properCase entity}}Service } from './services/update-{{dashCase entity}}.service';
-import { Delete{{properCase entity}}Service } from './services/delete-{{dashCase entity}}.service';
+// Repository
+import { {{pascalCase entity}}PrismaRepository } from './prisma-repositorys/{{dashCase entity}}.prisma.repository';
+
+// Mapper
+import { {{properCase entity}}Mapper } from './mappers/{{dashCase entity}}.mapper';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [
+    AutomapperModule.forRoot({
+      strategyInitializer: classes(),
+    }),
+    PrismaModule,
+  ],
   controllers: [
     Create{{properCase entity}}Controller,
     Get{{properCase entity}}Controller,
@@ -31,18 +43,18 @@ import { Delete{{properCase entity}}Service } from './services/delete-{{dashCase
     GetById{{properCase entity}}Service,
     Update{{properCase entity}}Service,
     Delete{{properCase entity}}Service,
-
-    // Repository Provider
     {
       provide: '{{properCase entity}}Repository',
-      useClass: {{properCase entity}}PrismaRepository,
-    }
+      useClass: {{pascalCase entity}}PrismaRepository,
+    },
+    {{properCase entity}}Mapper,
   ],
   exports: [
-    {
-      provide: '{{properCase entity}}Repository',
-      useClass: {{properCase entity}}PrismaRepository,
-    }
+    Create{{properCase entity}}Service,
+    Get{{properCase entity}}Service,
+    GetById{{properCase entity}}Service,
+    Update{{properCase entity}}Service,
+    Delete{{properCase entity}}Service,
   ],
 })
 export class {{properCase entity}}Module {}

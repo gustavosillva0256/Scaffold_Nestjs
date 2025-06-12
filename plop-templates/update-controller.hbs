@@ -1,39 +1,21 @@
-import { Controller, Patch, Param, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
-import { Update{{properCase entity}}Service } from '../services/update-{{dashCase entity}}.service';
-import { Update{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/update{{dashCase entity}}.dto';
+import { Controller } from '@nestjs/common';
+import { Crud } from '@nestjsx/crud';
+import { ApiTags, ApiResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
 import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
+import { Update{{properCase entity}}Service } from '../services/update-{{dashCase entity}}.service';
 
-@ApiTags('{{dashCase entity}}')
+@Crud({
+  model: { type: {{properCase entity}}Dto },
+  routes: {
+    only: ['updateOneBase'],
+  },
+})
+@ApiTags('{{properCase entity}}')
+@ApiResponse({ status: 200, description: 'Registro atualizado com sucesso.', type: {{properCase entity}}Dto })
+@ApiBadRequestResponse({ description: 'Dados inválidos ou incompletos.' })
+@ApiNotFoundResponse({ description: 'Registro não encontrado.' })
+@ApiInternalServerErrorResponse({ description: 'Erro interno no servidor.' })
 @Controller('{{dashCase entity}}')
 export class Update{{properCase entity}}Controller {
-  constructor(
-    private readonly updateService: Update{{properCase entity}}Service,
-  ) {}
-
-  @Patch(':id')
-  @ApiOperation({ 
-    summary: '[{{properCase entity}}] Atualizar registro', 
-    description: 'Modifica dados parciais de um {{properCase entity}} existente' 
-  })
-  @ApiParam({ 
-    name: 'id', 
-    description: 'UUID do registro',
-    example: '550e8400-e29b-41d4-a716-446655440000' 
-  })
-  @ApiBody({ type: Update{{properCase entity}}Dto })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Registro atualizado',
-    type: {{properCase entity}}Dto 
-  })
-  @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  @ApiResponse({ status: 404, description: 'Registro não localizado' })
-  @ApiResponse({ status: 500, description: 'Falha na atualização' })
-  async update(
-    @Param('id') id: string,
-    @Body() dto: Update{{properCase entity}}Dto,
-  ) {
-    return this.updateService.execute(id, dto);
-  }
-}
+  constructor(public service: Update{{properCase entity}}Service) {}
+} 

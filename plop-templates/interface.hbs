@@ -14,4 +14,8 @@ export interface {{properCase entity}}Repository {
   findBy{{properCase name}}({{name}}: {{type}}): Promise<{{properCase entity}}Dto | null>;
   {{/if}}
   {{/each}}
+
+  // Método para verificação de existência por campo único
+  // Ajuste conforme o campo único da entidade (exemplo: email, name)
+  // findByUniqueField(fieldValue: string, fieldName?: string): Promise<{{properCase entity}}Dto | null>;
 }
