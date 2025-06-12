@@ -239,7 +239,7 @@ Para garantir que tudo funcione perfeitamente, siga SEMPRE esta ordem ao alterar
 
 4. **Gere os módulos com o Plop**
    ```bash
-   npx plop scaffold
+   npx plop 
    ```
    Agora, com DTOs e banco sincronizados, o Plop irá gerar módulos, controllers, services, etc., já refletindo o schema atualizado.
 
