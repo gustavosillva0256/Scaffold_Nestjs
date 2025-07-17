@@ -8,43 +8,16 @@ datasource db {
 }
 
 generator nestjsDto {
-  provider = "prisma-generator-nestjs-dto"
-  output   = "../src/dtos"
-  outputToNestJsResourceStructure = true
-  noDependencies = false
-  exportRelationModifierClasses = false
-  separateRelationFields = false
-  addSwaggerDecorators = true
-  classValidation = true
-}
-
-// ============== MODELS DE EXEMPLO (Blog) ==============
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  posts     Post[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  comments  Comment[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Comment {
-  id        Int      @id @default(autoincrement())
-  text      String
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/dtos"
+  addSwaggerDecorators            = "true"
+  classValidation                 = "true"
+  exportRelationModifierClasses   = "false"
+  noDependencies                  = "false"
+  outputToNestJsResourceStructure = "true"
+  separateRelationFields          = "false"
+  createInputTypeName             = "Create{name}Dto"
+  updateInputTypeName             = "Update{name}Dto"
+  createInputTypeFilterValueTypes = "true"
+  updateInputTypeFilterValueTypes = "true"
 }

@@ -1,21 +1,31 @@
-import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
-import { Create{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
-import { Update{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/update-{{dashCase entity}}.dto';
+import { Prisma, {{pascalCase entity}} } from '@prisma/client';
+import { Create{{properCase entity}}Dto } from '../../../dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+import { Update{{properCase entity}}Dto } from '../../../dtos/{{dashCase entity}}/dto/update-{{dashCase entity}}.dto';
+
+export interface {{properCase entity}}FindOptions {
+  where?: Prisma.{{pascalCase entity}}WhereInput;
+  orderBy?: Prisma.{{pascalCase entity}}OrderByWithRelationInput;
+  limit?: number;
+  offset?: number;
+}
+
+export interface {{properCase entity}}CountOptions {
+  where?: Prisma.{{pascalCase entity}}WhereInput;
+}
+
+export interface {{properCase entity}}FilterOptions {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
 
 export interface {{properCase entity}}Repository {
-  create(data: Create{{properCase entity}}Dto): Promise<{{properCase entity}}Dto>;
-  findAll(): Promise<{{properCase entity}}Dto[]>;
-  findById(id: string): Promise<{{properCase entity}}Dto | null>;
-  update(id: string, data: Update{{properCase entity}}Dto): Promise<{{properCase entity}}Dto>;
-  delete(id: string): Promise<{{properCase entity}}Dto>;
-  
-  {{#each fields}}
-  {{#if (isUnique this)}}
-  findBy{{properCase name}}({{name}}: {{type}}): Promise<{{properCase entity}}Dto | null>;
-  {{/if}}
-  {{/each}}
-
-  // Método para verificação de existência por campo único
-  // Ajuste conforme o campo único da entidade (exemplo: email, name)
-  // findByUniqueField(fieldValue: string, fieldName?: string): Promise<{{properCase entity}}Dto | null>;
+  create(data: Create{{properCase entity}}Dto): Promise<{{pascalCase entity}}>;
+  findAll(options?: {{properCase entity}}FindOptions): Promise<{{pascalCase entity}}[]>;
+  findById(id: number): Promise<{{pascalCase entity}} | null>;
+  update(id: number, data: Update{{properCase entity}}Dto): Promise<{{pascalCase entity}}>;
+  delete(id: number): Promise<{{pascalCase entity}}>;
+  exists(id: number): Promise<boolean>;
+  count(options?: {{properCase entity}}CountOptions): Promise<number>;
+  findWithFilters(filters: {{properCase entity}}FilterOptions): Promise<{ {{camelCase entity}}s: {{pascalCase entity}}[]; total: number }>;
 }

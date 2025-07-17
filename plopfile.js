@@ -26,22 +26,38 @@ function capitalize(str) {
 }
 
 function extractDtoFields(dtoPath) {
-  if (!fs.existsSync(dtoPath)) return [];
+  if (!fs.existsSync(dtoPath)) {
+    console.warn(`⚠️  DTO não encontrado: ${dtoPath}`);
+    return [];
+  }
+  
   const fileContent = fs.readFileSync(dtoPath, 'utf8');
   const sourceFile = ts.createSourceFile(dtoPath, fileContent, ts.ScriptTarget.Latest, true);
   const fields = [];
+  
   ts.forEachChild(sourceFile, node => {
     if (ts.isClassDeclaration(node)) {
       node.members.forEach(member => {
         if (ts.isPropertyDeclaration(member) && member.name && member.type) {
+          const fieldName = member.name.getText();
+          const fieldType = member.type.getText();
+          
+          // Pular campos automáticos
+          if (['id', 'createdAt', 'updatedAt'].includes(fieldName)) {
+            return;
+          }
+          
           fields.push({
-            name: member.name.getText(),
-            type: member.type.getText(),
+            name: fieldName,
+            type: fieldType,
+            isOptional: member.questionToken !== undefined,
           });
         }
       });
     }
   });
+  
+  console.log(`📋 Campos extraídos de ${dtoPath}:`, fields.map(f => f.name));
   return fields;
 }
 
@@ -121,6 +137,7 @@ module.exports = function (plop) {
           type: 'add',
           path: `${modulePath}/interfaces/${entityName}.interface.ts`,
           templateFile: 'plop-templates/interface.hbs',
+          force: true,
         });
       }
       // Repository (sempre Prisma)
@@ -131,6 +148,7 @@ module.exports = function (plop) {
           type: 'add',
           path: `${modulePath}/prisma-repositorys/${entityName}.prisma.repository.ts`,
           templateFile: 'plop-templates/prisma-repository.hbs',
+          force: true,
         });
       }
       // Mapper
@@ -144,6 +162,7 @@ module.exports = function (plop) {
           type: 'add',
           path: `${modulePath}/mappers/${entityName}.mapper.ts`,
           templateFile: 'plop-templates/mapper.hbs',
+          force: true,
           data: {
             createFields,
             updateFields,
@@ -151,28 +170,16 @@ module.exports = function (plop) {
           },
         });
       }
-      // Services
+      // Services (service único)
       if (layers.includes('services')) {
         const serviceNames = [
-          `Create${capitalize(entity)}Service`,
-          `Get${capitalize(entity)}Service`,
-          `GetById${capitalize(entity)}Service`,
-          `Update${capitalize(entity)}Service`,
-          `Delete${capitalize(entity)}Service`,
+          `${capitalize(entity)}Service`,
         ];
         const serviceTemplates = [
-          'create-service.hbs',
-          'get-service.hbs',
-          'getById-service.hbs',
-          'update-service.hbs',
-          'delete-service.hbs',
+          'service.hbs',
         ];
         const fileNames = [
-          `create-${entityName}.service.ts`,
-          `get-${entityName}.service.ts`,
-          `get-by-id-${entityName}.service.ts`,
-          `update-${entityName}.service.ts`,
-          `delete-${entityName}.service.ts`,
+          `${entityName}.service.ts`,
         ];
         serviceNames.forEach((service, idx) => {
           services.push(service);
@@ -180,31 +187,20 @@ module.exports = function (plop) {
             type: 'add',
             path: `${modulePath}/services/${fileNames[idx]}`,
             templateFile: `plop-templates/${serviceTemplates[idx]}`,
+            force: true,
           });
         });
       }
-      // Controllers (sempre todos individuais)
+      // Controllers (controller único)
       if (layers.includes('controllers')) {
         const controllerNames = [
-          `Create${capitalize(entity)}Controller`,
-          `Get${capitalize(entity)}Controller`,
-          `GetById${capitalize(entity)}Controller`,
-          `Update${capitalize(entity)}Controller`,
-          `Delete${capitalize(entity)}Controller`,
+          `${capitalize(entity)}Controller`,
         ];
         const controllerTemplates = [
-          'create-controller.hbs',
-          'get-controller.hbs',
-          'getById-controller.hbs',
-          'update-controller.hbs',
-          'delete-controller.hbs',
+          'controller.hbs',
         ];
         const fileNames = [
-          `create-${entityName}.controller.ts`,
-          `get-${entityName}.controller.ts`,
-          `get-by-id-${entityName}.controller.ts`,
-          `update-${entityName}.controller.ts`,
-          `delete-${entityName}.controller.ts`,
+          `${entityName}.controller.ts`,
         ];
         controllerNames.forEach((ctrl, idx) => {
           controllers.push(ctrl);
@@ -212,6 +208,7 @@ module.exports = function (plop) {
             type: 'add',
             path: `${modulePath}/controllers/${fileNames[idx]}`,
             templateFile: `plop-templates/${controllerTemplates[idx]}`,
+            force: true,
           });
         });
       }
@@ -221,6 +218,7 @@ module.exports = function (plop) {
           type: 'add',
           path: `${modulePath}/${entityName}.module.ts`,
           templateFile: 'plop-templates/module.hbs',
+          force: true,
           data: {
             entity: capitalize(entity),
             services,
@@ -237,6 +235,7 @@ module.exports = function (plop) {
           type: 'add',
           path: `${modulePath}/index.ts`,
           templateFile: 'plop-templates/index.hbs',
+          force: true,
         });
       }
       // Atualizar app.module.ts
@@ -246,16 +245,18 @@ module.exports = function (plop) {
         }
         return 'app.module.ts atualizado';
       });
-      // Prisma generate sempre após gerar o módulo
-      actions.push(function () {
-        try {
-          execSync('npx prisma generate', { stdio: 'inherit' });
-        } catch (error) {
-          console.error('Erro ao rodar prisma generate:', error.message);
-        }
-        return 'Prisma client/DTOs atualizados';
-      });
       return actions;
     },
+  });
+
+  // Helper para identificar campos de relação (terminam com Id)
+  plop.setHelper('isRelation', function (fieldName) {
+    return /Id$/i.test(fieldName);
+  });
+  // Helper para gerar nome da relação (remove 'Id' do final e camelCase)
+  plop.setHelper('relationName', function (fieldName) {
+    if (!/Id$/i.test(fieldName)) return fieldName;
+    const base = fieldName.replace(/Id$/i, '');
+    return base.charAt(0).toLowerCase() + base.slice(1);
   });
 };

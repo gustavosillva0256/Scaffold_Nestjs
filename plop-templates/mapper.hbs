@@ -1,44 +1,95 @@
 import { Injectable } from '@nestjs/common';
 import { Mapper } from '@automapper/core';
 import { InjectMapper } from '@automapper/nestjs';
-import type { {{pascalCase entity}} } from '@prisma/client';
-import { {{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/{{dashCase entity}}.dto';
-import { Create{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
-import { Update{{properCase entity}}Dto } from 'src/dtos/{{dashCase entity}}/dto/update-{{dashCase entity}}.dto';
+import type { {{pascalCase entity}}, Prisma } from '@prisma/client';
+import { Create{{properCase entity}}Dto } from '../../../dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+import { Update{{properCase entity}}Dto } from '../../../dtos/{{dashCase entity}}/dto/update-{{dashCase entity}}.dto';
+
+// Tipos para relações
+type {{pascalCase entity}}WithRelations = {{pascalCase entity}} & Record<string, unknown>;
+type Create{{properCase entity}}DtoWithRelations = Create{{properCase entity}}Dto & Record<string, unknown>;
 
 @Injectable()
 export class {{properCase entity}}Mapper {
   constructor(@InjectMapper() private readonly mapper: Mapper) {}
-  // Certifique-se de importar AutomapperModule.forRoot() no módulo
 
   /**
    * Converte uma entidade Prisma para DTO
    * Adapte este método para mapear relações caso existam (ex: entity.relacao)
    */
-  toDto(entity: {{pascalCase entity}}): {{properCase entity}}Dto {
-    return this.mapper.map(entity, {{properCase entity}}Dto, '{{pascalCase entity}}');
+  toDto(entity: {{pascalCase entity}}): Create{{properCase entity}}Dto {
+    return this.mapper.map(entity, '{{pascalCase entity}}', 'Create{{properCase entity}}Dto');
   }
 
   /**
    * Converte um DTO de criação para o formato esperado pelo Prisma
+   * Mapeia todos os campos automaticamente
    */
-  toCreateInput(dto: Create{{properCase entity}}Dto): import('@prisma/client').Prisma.{{pascalCase entity}}CreateInput {
+  toCreateInput(dto: Create{{properCase entity}}Dto): Prisma.{{pascalCase entity}}CreateInput {
     return {
       {{#each createFields}}
-      // {{type}}
+      {{#if (isRelation name)}}
+      {{relationName name}}: { connect: { id: dto.{{name}} } },
+      {{else}}
       {{name}}: dto.{{name}},
+      {{/if}}
       {{/each}}
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
   }
 
   /**
    * Converte um DTO de atualização para o formato esperado pelo Prisma
+   * Mapeia apenas campos não nulos com tipagem forte
    */
-  toUpdateInput(dto: Update{{properCase entity}}Dto): import('@prisma/client').Prisma.{{pascalCase entity}}UpdateInput {
+  toUpdateInput(dto: Update{{properCase entity}}Dto): Prisma.{{pascalCase entity}}UpdateInput {
+    // Filtra apenas campos definidos (excluindo campos de relação)
+    const { {{#each updateFields}}{{#if (isRelation name)}}{{name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}}, ...otherFields } = dto;
+    const definedFields = Object.fromEntries(
+      Object.entries(otherFields).filter(([_, value]) => value !== undefined)
+    );
+    
+    // Mapeia campos de relação para connect
+    const updateData: Prisma.{{pascalCase entity}}UpdateInput = { ...definedFields };
+    
+    {{#each updateFields}}
+    {{#if (isRelation name)}}
+    if ({{name}} !== undefined) {
+      updateData.{{relationName name}} = { connect: { id: {{name}} } };
+    }
+    {{/if}}
+    {{/each}}
+    
+    updateData.updatedAt = new Date();
+    
+    return updateData;
+  }
+
+  /**
+   * Mapeia entidade Prisma para DTO manualmente (sem AutoMapper)
+   */
+  toDtoManual(entity: {{pascalCase entity}}): Create{{properCase entity}}Dto {
     return {
-      {{#each updateFields}}
-      // {{type}}
+      {{#each createFields}}
+      {{name}}: entity.{{name}}{{#if isOptional}} || null{{/if}},
+      {{/each}}
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
+  }
+
+  /**
+   * Mapeia DTO para entidade Prisma manualmente
+   */
+  toEntity(dto: Create{{properCase entity}}Dto): Omit<{{pascalCase entity}}, 'id' | 'createdAt' | 'updatedAt'> {
+    return {
+      {{#each createFields}}
+      {{#if (isRelation name)}}
       {{name}}: dto.{{name}},
+      {{else}}
+      {{name}}: dto.{{name}}{{#if isOptional}} || null{{/if}},
+      {{/if}}
       {{/each}}
     };
   }
@@ -46,8 +97,71 @@ export class {{properCase entity}}Mapper {
   /**
    * Converte uma lista de entidades Prisma para uma lista de DTOs
    */
-  toDtoList(entities: {{pascalCase entity}}[]): {{properCase entity}}Dto[] {
+  toDtoList(entities: {{pascalCase entity}}[]): Create{{properCase entity}}Dto[] {
     return entities.map(entity => this.toDto(entity));
+  }
+
+  /**
+   * Converte uma lista de entidades Prisma para uma lista de DTOs (manual)
+   */
+  toDtoListManual(entities: {{pascalCase entity}}[]): Create{{properCase entity}}Dto[] {
+    return entities.map(entity => this.toDtoManual(entity));
+  }
+
+  /**
+   * Converte uma lista de DTOs para entidades Prisma
+   */
+  toEntityList(dtos: Create{{properCase entity}}Dto[]): Omit<{{pascalCase entity}}, 'id' | 'createdAt' | 'updatedAt'>[] {
+    return dtos.map(dto => this.toEntity(dto));
+  }
+
+  /**
+   * Mapeia entidade com relações incluídas
+   * Use este método quando buscar dados com include/select
+   */
+  toDtoWithRelations(entity: {{pascalCase entity}}WithRelations): Create{{properCase entity}}DtoWithRelations {
+    const baseDto = this.toDtoManual(entity);
+    
+    // Mapeia relações automaticamente se existirem
+    const relations: Record<string, unknown> = {};
+    
+    // Exemplo de mapeamento de relações (ajuste conforme suas entidades):
+    // if (entity.user) {
+    //   relations.user = this.userMapper.toDtoManual(entity.user);
+    // }
+    // if (entity.comments) {
+    //   relations.comments = entity.comments.map(comment => this.commentMapper.toDtoManual(comment));
+    // }
+    
+    return { ...baseDto, ...relations };
+  }
+
+  /**
+   * Mapeia DTO com relações para input do Prisma
+   * Use para criar/atualizar com relações
+   */
+  toCreateInputWithRelations(dto: Create{{properCase entity}}DtoWithRelations): Prisma.{{pascalCase entity}}CreateInput {
+    const baseInput = this.toCreateInput(dto);
+    
+    // Mapeia relações para o formato do Prisma
+    const relations: Record<string, unknown> = {};
+    
+    // Exemplo de mapeamento de relações (ajuste conforme suas entidades):
+    // if (dto.userId) {
+    //   relations.user = { connect: { id: dto.userId } };
+    // }
+    // if (dto.categoryIds) {
+    //   relations.categories = { connect: dto.categoryIds.map(id => ({ id })) };
+    // }
+    
+    return { ...baseInput, ...relations };
+  }
+
+  /**
+   * Mapeia lista de entidades com relações
+   */
+  toDtoListWithRelations(entities: {{pascalCase entity}}WithRelations[]): Create{{properCase entity}}DtoWithRelations[] {
+    return entities.map(entity => this.toDtoWithRelations(entity));
   }
 }
 
@@ -61,25 +175,74 @@ export class {{properCase entity}}Profile {
 
   get profile() {
     return (mapper: Mapper) => {
-      createMap(mapper, '{{pascalCase entity}}', {{properCase entity}}Dto);
-      // Exemplo de mapeamento manual para relacionamentos:
-      // Para 1:N:
+      // Mapeamento automático de entidade para DTO
+      createMap(mapper, '{{pascalCase entity}}', 'Create{{properCase entity}}Dto');
+      
+      // Mapeamento automático de DTO para entidade (criação)
+      createMap(mapper, 'Create{{properCase entity}}Dto', '{{pascalCase entity}}');
+      
+      // Mapeamento automático de DTO para entidade (atualização)
+      createMap(mapper, 'Update{{properCase entity}}Dto', '{{pascalCase entity}}');
+      
+      // Exemplos de mapeamento manual para relacionamentos:
+      
+      // Para relação 1:1 (ex: User -> Profile)
       // forMember(
-      //   (dest) => dest.comments,
-      //   mapFrom((src) => src.comments?.map(item => mapper.map(item, CommentDto, Object)))
+      //   (dest) => dest.profile,
+      //   mapFrom((src) => src.profile && mapper.map(src.profile, ProfileDto, Object))
       // ),
-      // Para 1:1:
+      
+      // Para relação 1:N (ex: User -> Posts)
       // forMember(
-      //   (dest) => dest.author,
-      //   mapFrom((src) => src.author && mapper.map(src.author, UserDto, Object))
+      //   (dest) => dest.posts,
+      //   mapFrom((src) => src.posts?.map(post => mapper.map(post, PostDto, Object)))
+      // ),
+      
+      // Para relação N:N (ex: Post -> Tags)
+      // forMember(
+      //   (dest) => dest.tags,
+      //   mapFrom((src) => src.tags?.map(tag => mapper.map(tag, TagDto, Object)))
+      // ),
+      
+      // Para relação com campos customizados
+      // forMember(
+      //   (dest) => dest.authorName,
+      //   mapFrom((src) => src.author?.name)
       // ),
     };
   }
 }
-// Mapper e Profile separados, imports absolutos para DTOs e exemplos comentados. 
 
 /**
- * Observações:
- * - Os campos são gerados automaticamente a partir dos DTOs.
- * - Adapte validações e transformações conforme necessário.
+ * Mapper com mapeamento automático de campos e suporte a relações
+ * 
+ * Funcionalidades Básicas:
+ * - toCreateInput(): Mapeia todos os campos do DTO para criação
+ * - toUpdateInput(): Mapeia apenas campos não nulos para atualização
+ * - toDtoManual(): Mapeamento manual sem AutoMapper
+ * - toEntity(): Mapeia DTO para entidade (excluindo campos automáticos)
+ * - toDtoListManual(): Mapeia lista de entidades para DTOs
+ * - toEntityList(): Mapeia lista de DTOs para entidades
+ * 
+ * Funcionalidades com Relações:
+ * - toDtoWithRelations(): Mapeia entidade com relações incluídas
+ * - toCreateInputWithRelations(): Mapeia DTO com relações para Prisma
+ * - toDtoListWithRelations(): Mapeia lista de entidades com relações
+ * 
+ * Exemplo de uso básico:
+ * const mapper = new UserMapper();
+ * const userData = { name: 'João', email: 'joao@email.com' };
+ * const prismaInput = mapper.toCreateInput(userData);
+ * // Resultado: { name: 'João', email: 'joao@email.com' }
+ * 
+ * Exemplo com relações:
+ * const userWithProfile = await prisma.user.findUnique({
+ *   where: { id: 1 },
+ *   include: { profile: true, posts: true }
+ * });
+ * const dtoWithRelations = mapper.toDtoWithRelations(userWithProfile);
+ * // Resultado: { id: 1, name: 'João', profile: {...}, posts: [...] }
+ * 
+ * Para usar relações, descomente e ajuste os exemplos no código.
+ * Os campos são extraídos automaticamente dos DTOs gerados pelo Prisma.
  */ 

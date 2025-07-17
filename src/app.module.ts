@@ -1,16 +1,19 @@
-import { UserModule } from './modules/user/user.module';
-
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
-
-
+    // Modulos
+    // Controladores
+    // Servicos
+    // Repositorios
+    // DTOs
+    // Entidades
+    // Configuracoes
 @Module({
-  imports: [  
-    
-
-   
-  
-    UserModule,],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [],
   providers: [],
 })

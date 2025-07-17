@@ -1,0 +1,84 @@
+import { Controller, Get, Post, Patch, Delete, Param, Body, ParseIntPipe, Query } from '@nestjs/common';
+import { ApiTags, ApiResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiInternalServerErrorResponse, ApiQuery } from '@nestjs/swagger';
+import { Create{{properCase entity}}Dto } from '../../../dtos/{{dashCase entity}}/dto/create-{{dashCase entity}}.dto';
+import { Update{{properCase entity}}Dto } from '../../../dtos/{{dashCase entity}}/dto/update-{{dashCase entity}}.dto';
+import { {{properCase entity}}Service } from '../services/{{dashCase entity}}.service';
+import { {{properCase entity}}FilterOptions } from '../interfaces/{{dashCase entity}}.interface';
+
+@ApiTags('{{properCase entity}}')
+@ApiResponse({ status: 200, description: 'Operação realizada com sucesso.' })
+@ApiBadRequestResponse({ description: 'Dados inválidos ou incompletos.' })
+@ApiNotFoundResponse({ description: 'Registro não encontrado.' })
+@ApiInternalServerErrorResponse({ description: 'Erro interno no servidor.' })
+@Controller('{{dashCase entity}}')
+export class {{properCase entity}}Controller {
+  constructor(
+    public service: {{properCase entity}}Service,
+  ) {}
+
+  @Get()
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limite de registros (máx: 100)' })
+  @ApiQuery({ name: 'offset', required: false, type: Number, description: 'Offset para paginação' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Termo de busca' })
+  async getMany(
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('search') search?: string,
+  ) {
+    console.debug('GET /{{dashCase entity}} - Parâmetros recebidos:', {
+      limit, offset, search
+    });
+
+    // Se há filtros específicos, usar o método otimizado
+    if (search) {
+      const filters: {{properCase entity}}FilterOptions = {
+        limit: limit ? Math.min(parseInt(limit), 100) : 10,
+        offset: offset ? parseInt(offset) : 0,
+        search,
+      };
+
+      return this.service.getWithFilters(filters);
+    }
+
+    // Caso contrário, usar o método padrão
+    const options = {
+      limit: limit ? Math.min(parseInt(limit), 100) : 10,
+      offset: offset ? parseInt(offset) : 0,
+    };
+
+    const {{camelCase entity}}s = await this.service.getMany(options);
+    const total = await this.service.getCount();
+
+    return {
+      data: {{camelCase entity}}s,
+      total,
+      limit: options.limit,
+      offset: options.offset,
+      hasMore: options.offset + options.limit < total
+    };
+  }
+
+  @Get(':id')
+  async getOne(@Param('id', ParseIntPipe) id: number) {
+    console.debug('GET /{{dashCase entity}}/:id - ID recebido:', id);
+    return this.service.getOne(id);
+  }
+
+  @Post()
+  async createOne(@Body() data: Create{{properCase entity}}Dto) {
+    console.debug('POST /{{dashCase entity}} - Dados recebidos:', data);
+    return this.service.createOne(data);
+  }
+
+  @Patch(':id')
+  async updateOne(@Param('id', ParseIntPipe) id: number, @Body() data: Update{{properCase entity}}Dto) {
+    console.debug('PATCH /{{dashCase entity}}/:id - ID e dados recebidos:', { id, data });
+    return this.service.updateOne(id, data);
+  }
+
+  @Delete(':id')
+  async deleteOne(@Param('id', ParseIntPipe) id: number) {
+    console.debug('DELETE /{{dashCase entity}}/:id - ID recebido:', id);
+    return this.service.deleteOne(id);
+  }
+} 
